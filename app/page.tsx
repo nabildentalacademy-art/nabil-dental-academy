@@ -1,81 +1,159 @@
 "use client";
 import { useState, useEffect } from "react";
 
-export default function Home() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+// لیست ولایات افغانستان برای کادر انتخابی
+const provinces = ["کابل", "هرات", "بلخ", "قندهار", "ننگرهار", "پکتیا", "خوست", "غزنی", "لغمان", "بامیان", "بدخشان", "تخار", "کندز", "فاریاب", "جوزجان", "سرپل", "غور", "دایکندی", "اروزگان", "زابل", "نیمروز", "هلمند", "فراه", "بادغیس", "پنجشیر", "کاپیسا", "لوگر", "میدان وردک", "پروان", "کنر", "نورستان", "سمنگان", "بغلان", "پکتیکا"];
+
+// نسبت‌های پایواز
+const relations = ["برادر", "پدر", "خواهر", "شوهر", "همسر", "کاکا", "ماما", "خسر", "خسربوره", "پسر کاکا", "پسرعمه", "پسر ماما", "پسرخاله", "دوست", "خواهر زاده", "برادر زاده"];
+
+export default function NabilClinicPro() {
+  const [activeTab, setActiveTab] = useState("register");
   const [patients, setPatients] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [form, setForm] = useState({ name: "", phone: "", note: "", amount: "" });
+
+  // فرم جامع اطلاعات
+  const [form, setForm] = useState({
+    name: "", fatherName: "", lastName: "", age: "", province: "کابل", phone: "", visitDate: "", nextVisit: "",
+    attendantName: "", attendantPhone: "", relation: "پدر",
+    bp: "", pulse: "", ox: "", temp: "",
+    serviceType: "", servicePrice: 0, labCost: 0, otherCosts: 0
+  });
 
   useEffect(() => {
-    const data = localStorage.getItem("nabil_clinic_final");
-    if (data) setPatients(JSON.parse(data));
+    const saved = localStorage.getItem("nabil_pro_db");
+    if (saved) setPatients(JSON.parse(saved));
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("nabil_clinic_final", JSON.stringify(patients));
-  }, [patients]);
+  const savePatient = () => {
+    const totalIncome = Number(form.servicePrice);
+    const expenses = Number(form.labCost) + Number(form.otherCosts);
+    const netProfit = totalIncome - expenses;
+    const ownerShare = netProfit * 0.25;
+    const doctorsSplit = (netProfit - ownerShare) / 2;
 
-  const handleSave = (e: any) => {
-    e.preventDefault();
-    if (!form.name || !form.phone) return alert("لطفاً نام و شماره را وارد کنید");
-    const newP = { ...form, id: Date.now(), date: new Date().toLocaleDateString('fa-IR'), amount: Number(form.amount) || 0 };
-    setPatients([newP, ...patients]);
-    setForm({ name: "", phone: "", note: "", amount: "" });
-    setActiveTab("dashboard");
+    const newPatient = {
+      ...form,
+      id: Date.now(),
+      ownerShare,
+      drNabilShare: doctorsSplit,
+      drMahfouzShare: doctorsSplit,
+      netProfit
+    };
+
+    const updated = [newPatient, ...patients];
+    setPatients(updated);
+    localStorage.setItem("nabil_pro_db", JSON.stringify(updated));
+    alert("مشخصات با موفقیت ثبت شد");
+    setActiveTab("list");
   };
 
-  const filtered = patients.filter(p => p.name.includes(searchTerm) || p.phone.includes(searchTerm));
-
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row-reverse text-right text-black" dir="rtl">
-      <aside className="w-full md:w-64 bg-white p-6 border-l shadow-sm">
-        <h1 className="text-xl font-black text-blue-600 mb-8 text-center">مدیریت آکادمی نابل</h1>
-        <nav className="space-y-2">
-          <button onClick={() => setActiveTab("dashboard")} className={`w-full p-3 rounded-xl font-bold transition ${activeTab === "dashboard" ? "bg-blue-600 text-white shadow-md" : "bg-gray-50 text-gray-600"}`}>📋 لیست مراجعین</button>
-          <button onClick={() => setActiveTab("register")} className={`w-full p-3 rounded-xl font-bold transition ${activeTab === "register" ? "bg-blue-600 text-white shadow-md" : "bg-gray-50 text-gray-600"}`}>➕ ثبت مورد جدید</button>
+    <div className="min-h-screen bg-slate-100 text-right text-slate-800 font-sans" dir="rtl">
+      {/* منوی کناری */}
+      <aside className="fixed right-0 top-0 h-full w-64 bg-white shadow-xl p-6 hidden md:block">
+        <h2 className="text-xl font-black text-blue-800 mb-8">مدیریت آکادمی نابل</h2>
+        <nav className="space-y-3">
+          <button onClick={() => setActiveTab("register")} className={`w-full p-3 rounded-xl font-bold ${activeTab === 'register' ? 'bg-blue-600 text-white' : 'bg-slate-50'}`}>ثبت بیمار جدید</button>
+          <button onClick={() => setActiveTab("list")} className={`w-full p-3 rounded-xl font-bold ${activeTab === 'list' ? 'bg-blue-600 text-white' : 'bg-slate-50'}`}>لیست مریضان</button>
+          <button onClick={() => setActiveTab("nextVisits")} className={`w-full p-3 rounded-xl font-bold ${activeTab === 'nextVisits' ? 'bg-blue-600 text-white' : 'bg-slate-50'}`}>نوبت‌های بعدی</button>
         </nav>
       </aside>
 
-      <main className="flex-1 p-4 md:p-8">
-        {activeTab === "dashboard" ? (
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-r from-blue-700 to-blue-500 text-white p-6 rounded-2xl mb-8 shadow-lg">
-              <p className="opacity-80 text-sm mb-1">مجموع واریزی‌ها:</p>
-              <h2 className="text-3xl font-black">{patients.reduce((s, p) => s + p.amount, 0).toLocaleString()} <span className="text-sm font-normal">افغانی</span></h2>
+      <main className="md:mr-64 p-8">
+        {activeTab === "register" && (
+          <div className="max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+            <h3 className="text-xl font-black mb-6 border-b pb-4">۱. مشخصات عمومی و پایواز</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <input placeholder="نام" className="p-3 bg-slate-50 rounded-lg border" onChange={e => setForm({...form, name: e.target.value})} />
+              <input placeholder="نام پدر" className="p-3 bg-slate-50 rounded-lg border" onChange={e => setForm({...form, fatherName: e.target.value})} />
+              <input placeholder="تخلص" className="p-3 bg-slate-50 rounded-lg border" onChange={e => setForm({...form, lastName: e.target.value})} />
+              <input placeholder="سن" type="number" className="p-3 bg-slate-50 rounded-lg border" onChange={e => setForm({...form, age: e.target.value})} />
+              <select className="p-3 bg-slate-50 rounded-lg border" onChange={e => setForm({...form, province: e.target.value})}>
+                {provinces.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+              <input placeholder="شماره تماس" className="p-3 bg-slate-50 rounded-lg border" onChange={e => setForm({...form, phone: e.target.value})} />
+              <input placeholder="تاریخ مراجعه" type="date" className="p-3 bg-slate-50 rounded-lg border" onChange={e => setForm({...form, visitDate: e.target.value})} />
+              <input placeholder="تاریخ نوبت بعدی" type="date" className="p-3 bg-slate-50 rounded-lg border" onChange={e => setForm({...form, nextVisit: e.target.value})} />
             </div>
-            
-            <input 
-              placeholder="🔍 جستجو با نام یا شماره تماس..." 
-              className="w-full p-4 rounded-2xl border-2 border-white mb-6 shadow-sm outline-none focus:border-blue-500 bg-white font-bold" 
-              onChange={e => setSearchTerm(e.target.value)} 
-              style={{ color: 'black' }}
-            />
 
+            <h3 className="text-xl font-black mb-6 border-b pb-4">۲. خدمات و محاسبات مالی</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <label className="block font-bold">هزینه درمان (افغانی):</label>
+                <input type="number" className="w-full p-4 bg-blue-50 border-2 border-blue-200 rounded-xl font-black text-2xl" placeholder="مثلاً 4000" onChange={e => setForm({...form, servicePrice: Number(e.target.value)})} />
+                <p className="text-xs text-slate-400 italic">قیمت‌ها را طبق لیست (مثلاً ریشه: 1000، بلیچینگ: 4000) وارد کنید.</p>
+              </div>
+              <div className="space-y-4">
+                <label className="block font-bold">مصارف (لابراتوار + مواد + نان):</label>
+                <div className="flex gap-2">
+                   <input placeholder="لابراتوار" type="number" className="w-1/2 p-3 bg-red-50 rounded-lg border" onChange={e => setForm({...form, labCost: Number(e.target.value)})} />
+                   <input placeholder="سایر مصارف" type="number" className="w-1/2 p-3 bg-red-50 rounded-lg border" onChange={e => setForm({...form, otherCosts: Number(e.target.value)})} />
+                </div>
+              </div>
+            </div>
+
+            <button onClick={savePatient} className="w-full mt-10 bg-green-600 text-white py-4 rounded-2xl font-black text-xl shadow-lg hover:bg-green-700 transition">ذخیره پرونده و محاسبه سهم اساتید</button>
+          </div>
+        )}
+
+        {activeTab === "list" && (
+          <div>
+            <input placeholder="جستجو بر اساس نام، آیدی یا تماس..." className="w-full p-4 rounded-2xl mb-6 shadow-sm border-none outline-none focus:ring-2 ring-blue-500" onChange={e => setSearchTerm(e.target.value)} />
             <div className="grid gap-4">
-              {filtered.map(p => (
-                <div key={p.id} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center hover:shadow-md transition">
+              {patients.filter(p => p.name.includes(searchTerm)).map(p => (
+                <div key={p.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap justify-between items-center">
                   <div>
-                    <p className="font-black text-lg text-gray-800">{p.name}</p>
-                    <p className="text-blue-600 font-bold text-sm">{p.phone}</p>
-                    <p className="text-gray-400 text-xs mt-1 font-medium">{p.date} {p.note && `| ${p.note}`}</p>
+                    <h4 className="font-black text-lg">{p.name} {p.lastName}</h4>
+                    <p className="text-sm text-blue-600 font-bold">{p.phone} | ولایت: {p.province}</p>
+                    <p className="text-xs text-slate-400 mt-1">نوبت بعدی: {p.nextVisit}</p>
                   </div>
-                  <div className="text-left font-black text-green-600 text-xl">{p.amount.toLocaleString()}</div>
+                  <div className="text-left bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200">
+                    <p className="text-xs text-slate-500 font-bold">سهم دکتر نابل: <span className="text-green-600">{p.drNabilShare.toLocaleString()}</span></p>
+                    <p className="text-xs text-slate-500 font-bold">سهم دکتر محفوظ: <span className="text-green-600">{p.drMahfouzShare.toLocaleString()}</span></p>
+                    <p className="text-xs text-red-400 font-bold">سهم مالک (۲۵٪): {p.ownerShare.toLocaleString()}</p>
+                  </div>
+                  <div className="flex gap-2 mt-4 md:mt-0">
+                    <button className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-bold text-sm">🖨 چاپ نسخه</button>
+                    <button className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-bold text-sm">📱 واتساپ</button>
+                    <button onClick={() => {
+                        const filtered = patients.filter(item => item.id !== p.id);
+                        setPatients(filtered);
+                        localStorage.setItem("nabil_pro_db", JSON.stringify(filtered));
+                    }} className="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-bold text-sm">حذف</button>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
-        ) : (
-          <div className="max-w-md mx-auto">
-            <form onSubmit={handleSave} className="bg-white p-8 rounded-[32px] shadow-xl border border-gray-50 space-y-5">
-              <h2 className="text-xl font-black text-center text-gray-800 mb-2">ثبت مشخصات و مالی</h2>
-              <input placeholder="نام بیمار / شاگرد" className="w-full p-4 border rounded-2xl bg-gray-50 font-bold outline-none focus:bg-white focus:border-blue-500 transition" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{color:'black'}} />
-              <input placeholder="شماره تماس" className="w-full p-4 border rounded-2xl bg-gray-50 font-bold outline-none focus:bg-white focus:border-blue-500 transition" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} style={{color:'black'}} />
-              <input placeholder="مبلغ دریافتی" type="number" className="w-full p-4 border rounded-2xl bg-gray-50 font-bold outline-none focus:bg-white focus:border-blue-500 transition" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})} style={{color:'black'}} />
-              <textarea placeholder="توضیحات تکمیلی" className="w-full p-4 border rounded-2xl bg-gray-50 font-bold h-28 outline-none focus:bg-white focus:border-blue-500 transition" value={form.note} onChange={e => setForm({...form, note: e.target.value})} style={{color:'black'}} />
-              <button className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 active:scale-95 transition-all">ذخیره در دیتابیس</button>
-            </form>
-          </div>
+        )}
+
+        {activeTab === "nextVisits" && (
+           <div className="bg-white rounded-3xl p-8 shadow-sm">
+              <h3 className="text-xl font-black mb-6">جدول مریضان نوبت بعدی</h3>
+              <table className="w-full text-center border-collapse">
+                <thead>
+                  <tr className="bg-slate-50">
+                    <th className="p-4 border-b">نام مریض</th>
+                    <th className="p-4 border-b">شماره تماس</th>
+                    <th className="p-4 border-b">تاریخ نوبت بعدی</th>
+                    <th className="p-4 border-b">عملیات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {patients.filter(p => p.nextVisit).map(p => (
+                    <tr key={p.id}>
+                      <td className="p-4 border-b font-bold">{p.name}</td>
+                      <td className="p-4 border-b text-blue-600 font-bold">{p.phone}</td>
+                      <td className="p-4 border-b font-black text-red-500">{p.nextVisit}</td>
+                      <td className="p-4 border-b">
+                        <a href={`https://wa.me/${p.phone}?text=سلام ${p.name} عزیز، نوبت بعدی شما در آکادمی نابل بتاریخ ${p.nextVisit} میباشد.`} target="_blank" className="bg-green-500 text-white px-4 py-2 rounded-lg text-xs font-bold">ارسال پیامک واتساپ</a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+           </div>
         )}
       </main>
     </div>
