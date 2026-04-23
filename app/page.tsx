@@ -3,7 +3,9 @@ import { useState, useEffect } from "react";
 
 const provinces = ["کابل", "هرات", "بلخ", "قندهار", "ننگرهار", "پکتیا", "خوست", "غزنی", "لغمان", "بامیان", "بدخشان", "تخار", "کندز", "فاریاب", "جوزجان", "سرپل", "غور", "دایکندی", "اروزگان", "زابل", "نیمروز", "هلمند", "فراه", "بادغیس", "پنجشیر", "کاپیسا", "لوگر", "میدان وردک", "پروان", "کنر", "نورستان", "سمنگان", "بغلان", "پکتیکا"];
 
-export default function NabilAcademyPro() {
+const relations = ["برادر", "پدر", "خواهر", "شوهر", "همسر", "کاکا", "ماما", "خسر", "خسربوره", "پسر کاکا", "پسرعمه", "پسر ماما", "پسرخاله", "دوست", "خواهر زاده", "برادر زاده"];
+
+export default function NabilAcademyFinal() {
   const [activeTab, setActiveTab] = useState("register");
   const [patients, setPatients] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,7 +18,7 @@ export default function NabilAcademyPro() {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem("nabil_pro_v3");
+    const saved = localStorage.getItem("nabil_v5_final");
     if (saved) setPatients(JSON.parse(saved));
   }, []);
 
@@ -32,20 +34,20 @@ export default function NabilAcademyPro() {
       id: Date.now(),
       ownerShare,
       drMohammadNaderShare: doctorsSplit,
-      drMahfouzShare: doctorsSplit,
-      netProfit
+      drMahfouzShare: doctorsSplit
     };
 
     const updated = [newPatient, ...patients];
     setPatients(updated);
-    localStorage.setItem("nabil_pro_v3", JSON.stringify(updated));
-    alert("اطلاعات با موفقیت در سیستم آکادمی دندان‌پزشکی نبیل ثبت شد");
+    localStorage.setItem("nabil_v5_final", JSON.stringify(updated));
+    alert("اطلاعات در آکادمی دندان‌پزشکی نبیل ثبت شد");
     setActiveTab("list");
   };
 
   return (
     <div className="min-h-screen bg-slate-50 text-right text-slate-900" dir="rtl">
-      <aside className="fixed right-0 top-0 h-full w-64 bg-white shadow-2xl p-6 hidden md:block border-l border-blue-100">
+      {/* Sidebar */}
+      <aside className="fixed right-0 top-0 h-full w-64 bg-white shadow-2xl p-6 hidden md:block border-l-4 border-blue-600">
         <h2 className="text-xl font-black text-blue-900 mb-8 border-b pb-4">آکادمی دندان‌پزشکی نبیل</h2>
         <nav className="space-y-3">
           <button onClick={() => setActiveTab("register")} className={`w-full p-4 rounded-2xl font-bold transition-all ${activeTab === 'register' ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-50 text-slate-500 hover:bg-blue-50'}`}>➕ ثبت مریض جدید</button>
@@ -55,67 +57,79 @@ export default function NabilAcademyPro() {
       </aside>
 
       <main className="md:mr-64 p-8">
-        <header className="mb-10 flex justify-between items-center">
+        <header className="mb-10 flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm">
           <div>
-            <h1 className="text-3xl font-black text-slate-900">مدیریت آکادمی نبیل</h1>
-            <p className="text-blue-600 font-bold mt-1">پنل کاربری دکتر محمد نادر نبیل</p>
+            <h1 className="text-2xl font-black text-slate-900">پنل مدیریت دکتر محمد نادر نبیل</h1>
+            <p className="text-blue-600 font-bold text-sm">آکادمی دندان‌پزشکی نبیل</p>
           </div>
         </header>
 
         {activeTab === "register" && (
-          <div className="max-w-4xl bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-200">
-            <h3 className="text-xl font-black mb-8 text-slate-800 border-r-4 border-blue-600 pr-4">ثبت اطلاعات اولیه و معاینات</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-              <input placeholder="نام مریض" className="p-4 bg-slate-50 rounded-xl border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none" onChange={e => setForm({...form, name: e.target.value})} />
-              <input placeholder="نام پدر" className="p-4 bg-slate-50 rounded-xl border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none" onChange={e => setForm({...form, fatherName: e.target.value})} />
-              <input placeholder="تخلص" className="p-4 bg-slate-50 rounded-xl border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none" onChange={e => setForm({...form, lastName: e.target.value})} />
-              <select className="p-4 bg-slate-50 rounded-xl border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none" onChange={e => setForm({...form, province: e.target.value})}>
+          <div className="max-w-5xl bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+            <h3 className="text-lg font-black mb-6 text-blue-800 underline decoration-blue-200">۱. ثبت مشخصات مریض و پایواز</h3>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <input placeholder="نام مریض" className="p-3 bg-slate-50 rounded-xl border-none ring-1 ring-slate-200 outline-none focus:ring-2 ring-blue-500" onChange={e => setForm({...form, name: e.target.value})} />
+              <input placeholder="نام پدر" className="p-3 bg-slate-50 rounded-xl border-none ring-1 ring-slate-200 outline-none focus:ring-2 ring-blue-500" onChange={e => setForm({...form, fatherName: e.target.value})} />
+              <input placeholder="تخلص" className="p-3 bg-slate-50 rounded-xl border-none ring-1 ring-slate-200 outline-none focus:ring-2 ring-blue-500" onChange={e => setForm({...form, lastName: e.target.value})} />
+              <input placeholder="سن" type="number" className="p-3 bg-slate-50 rounded-xl border-none ring-1 ring-slate-200 outline-none focus:ring-2 ring-blue-500" onChange={e => setForm({...form, age: e.target.value})} />
+              <select className="p-3 bg-slate-50 rounded-xl border-none ring-1 ring-slate-200 outline-none focus:ring-2 ring-blue-500 font-bold" onChange={e => setForm({...form, province: e.target.value})}>
                 {provinces.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
-              <input placeholder="شماره تماس" className="p-4 bg-slate-50 rounded-xl border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none" onChange={e => setForm({...form, phone: e.target.value})} />
-              <input placeholder="تاریخ نوبت بعدی" type="date" className="p-4 bg-slate-50 rounded-xl border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-blue-500 outline-none" onChange={e => setForm({...form, nextVisit: e.target.value})} />
+              <input placeholder="شماره تماس" className="p-3 bg-slate-50 rounded-xl border-none ring-1 ring-slate-200 outline-none focus:ring-2 ring-blue-500" onChange={e => setForm({...form, phone: e.target.value})} />
+              <input placeholder="تاریخ مراجعه" type="date" className="p-3 bg-slate-50 rounded-xl border-none ring-1 ring-slate-200" onChange={e => setForm({...form, visitDate: e.target.value})} />
+              <input placeholder="تاریخ نوبت بعدی" type="date" className="p-3 bg-slate-50 rounded-xl border-none ring-1 ring-blue-300" onChange={e => setForm({...form, nextVisit: e.target.value})} />
             </div>
 
-            <h3 className="text-xl font-black mb-8 text-slate-800 border-r-4 border-green-500 pr-4">محاسبات مالی و سهم اساتید</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50 p-8 rounded-3xl">
-              <div className="space-y-4">
-                <label className="block font-black text-slate-700">مجموع دریافتی از مریض (افغانی):</label>
-                <input type="number" className="w-full p-5 bg-white rounded-2xl border-none shadow-inner text-2xl font-black text-blue-700" placeholder="0" onChange={e => setForm({...form, servicePrice: Number(e.target.value)})} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 bg-blue-50 p-6 rounded-2xl">
+              <input placeholder="نام پایواز" className="p-3 bg-white rounded-xl" onChange={e => setForm({...form, attendantName: e.target.value})} />
+              <input placeholder="تماس پایواز" className="p-3 bg-white rounded-xl" onChange={e => setForm({...form, attendantPhone: e.target.value})} />
+              <select className="p-3 bg-white rounded-xl" onChange={e => setForm({...form, relation: e.target.value})}>
+                {relations.map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
+
+            <h3 className="text-lg font-black mb-6 text-green-700 underline decoration-green-200">۲. معاینات و محاسبات خدمات</h3>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <input placeholder="فشار خون" className="p-3 bg-slate-50 rounded-xl border" onChange={e => setForm({...form, bp: e.target.value})} />
+              <input placeholder="نبض" className="p-3 bg-slate-50 rounded-xl border" onChange={e => setForm({...form, pulse: e.target.value})} />
+              <input placeholder="O2 خون" className="p-3 bg-slate-50 rounded-xl border" onChange={e => setForm({...form, ox: e.target.value})} />
+              <input placeholder="حرارت بدن" className="p-3 bg-slate-50 rounded-xl border" onChange={e => setForm({...form, temp: e.target.value})} />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-100 rounded-2xl">
+              <div>
+                <label className="block font-black mb-2">قیمت خدمت طبق لیست (افغانی):</label>
+                <input type="number" className="w-full p-4 rounded-xl text-2xl font-black text-blue-700 shadow-inner" placeholder="0" onChange={e => setForm({...form, servicePrice: Number(e.target.value)})} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold">هزینه لابراتوار:</label>
-                  <input type="number" className="w-full p-3 bg-white rounded-xl border-none shadow-inner" placeholder="0" onChange={e => setForm({...form, labCost: Number(e.target.value)})} />
+              <div className="flex gap-2">
+                <div className="w-1/2">
+                  <label className="block text-xs font-bold mb-2">مصرف لابراتوار:</label>
+                  <input type="number" className="w-full p-3 rounded-xl shadow-inner" placeholder="0" onChange={e => setForm({...form, labCost: Number(e.target.value)})} />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold">مصارف (نان/مواد):</label>
-                  <input type="number" className="w-full p-3 bg-white rounded-xl border-none shadow-inner" placeholder="0" onChange={e => setForm({...form, otherCosts: Number(e.target.value)})} />
+                <div className="w-1/2">
+                  <label className="block text-xs font-bold mb-2">مواد و نان چاشت:</label>
+                  <input type="number" className="w-full p-3 rounded-xl shadow-inner" placeholder="0" onChange={e => setForm({...form, otherCosts: Number(e.target.value)})} />
                 </div>
               </div>
             </div>
 
-            <button onClick={savePatient} className="w-full mt-10 bg-blue-700 text-white py-5 rounded-[2rem] font-black text-xl shadow-xl hover:bg-blue-800 transition-all transform hover:scale-[1.01]">ذخیره و تایید نهایی</button>
+            <button onClick={savePatient} className="w-full mt-8 bg-blue-700 text-white py-5 rounded-[2rem] font-black text-xl shadow-xl hover:bg-blue-800 transition-all transform hover:scale-[1.01]">ذخیره در دیتابیس آکادمی</button>
           </div>
         )}
 
         {activeTab === "list" && (
-          <div className="space-y-6">
-            <input placeholder="🔍 جستجوی مریض بر اساس نام یا آیدی..." className="w-full p-5 rounded-[1.5rem] border-none shadow-sm focus:ring-2 ring-blue-500 outline-none bg-white font-bold" onChange={e => setSearchTerm(e.target.value)} />
+          <div className="space-y-4">
+            <input placeholder="🔍 جستجو بر اساس نام یا شماره تماس..." className="w-full p-5 rounded-2xl shadow-sm border-none bg-white font-bold mb-6" onChange={e => setSearchTerm(e.target.value)} />
             {patients.filter(p => p.name.includes(searchTerm)).map(p => (
-              <div key={p.id} className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-wrap justify-between items-center">
-                <div className="space-y-2">
-                  <h4 className="font-black text-2xl text-slate-800">{p.name} {p.lastName}</h4>
-                  <p className="text-blue-600 font-bold">{p.phone} | ولایت: {p.province}</p>
+              <div key={p.id} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex justify-between items-center">
+                <div>
+                  <h4 className="font-black text-xl">{p.name} {p.lastName}</h4>
+                  <p className="text-blue-600 font-bold text-sm">{p.phone} | ولایت: {p.province}</p>
+                  <p className="text-xs text-slate-400 mt-2">پایواز: {p.attendantName} ({p.relation})</p>
                 </div>
-                <div className="flex gap-4">
-                   <div className="bg-blue-50 px-6 py-4 rounded-2xl border border-blue-100 text-center">
-                      <p className="text-xs text-slate-500 font-bold mb-1">سهم دکتر محمد نادر</p>
-                      <p className="text-lg font-black text-blue-700">{p.drMohammadNaderShare.toLocaleString()}</p>
-                   </div>
-                   <div className="bg-slate-50 px-6 py-4 rounded-2xl border border-slate-100 text-center">
-                      <p className="text-xs text-slate-500 font-bold mb-1">سهم دکتر محفوظ</p>
-                      <p className="text-lg font-black text-slate-700">{p.drMahfouzShare.toLocaleString()}</p>
-                   </div>
+                <div className="text-left bg-slate-50 p-4 rounded-2xl">
+                  <p className="text-xs font-bold text-slate-500">سهم دکتر محمد نادر: <span className="text-green-600 text-lg font-black">{p.drMohammadNaderShare.toLocaleString()}</span></p>
+                  <p className="text-[10px] text-red-400 font-bold">سهم مالک (۲۵٪): {p.ownerShare.toLocaleString()}</p>
                 </div>
               </div>
             ))}
